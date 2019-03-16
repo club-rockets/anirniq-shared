@@ -8,16 +8,14 @@ The ID field of a standard CAN frame is 11-bit long, divided as follows
 
 ```none
 0123456789AB
-rr           2 bit reserved
-  nnn        3 bit node id
+nnnnn        5 bit node id
      mmmmmmm 6 bit message (register) id
 ```
 
-The two reserved bit should be set to `11` when sending messages.
-
 The node id are as follows:
 
-- `000` Mission
-- `001` Communication
-- `010` Acquisition
-- `011` Motherboard
+- `00000` Emergency (virtual node id that any board may use to transmit **emergency** messages)
+- `00001` Mission
+- `00010` Communication
+- `00011` Acquisition
+- `00100` Motherboard
