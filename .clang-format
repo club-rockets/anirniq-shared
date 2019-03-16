@@ -1,0 +1,5 @@
+BreakBeforeBraces: WebKit
+ColumnLimit: 120
+PointerAlignment: Right
+IndentWidth: 4
+UseTab: Never
