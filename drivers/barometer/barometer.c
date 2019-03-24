@@ -166,7 +166,7 @@ float pressure_to_altitude(float pressure)
     return 44307.693f - 4942.781f * pow(pressure, 0.190284);
 }
 
-/** Calcule la densité de l'air ambient selon la loi des gaz parfaits
+/** Computes ambient air density with the Ideal gas law
  *
  * @param[in]  pressure     Barometric air pressure, in Pascals
  * @param[in]  temperature  Air temperature, in Celsius
@@ -178,7 +178,7 @@ float compute_air_density(float pressure, float temperature)
     return (pressure * AIR_MOLAR_MASS) / (GAZ_CONSTANT * (CELSIUS_TO_KELVIN + temperature));
 }
 
-/** Calcule la vitesse du son dans l'air
+/** Returns speed of sound for a given temperature
  *
  * @param[in]  tempeature  Air temperature, in Celsius
  */
