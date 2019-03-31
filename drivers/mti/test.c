@@ -48,8 +48,12 @@ int main(int argc, char const *argv[])
 
     mti_t mti;
     mti_config_t config = {
-        .acceleration_sampling_rate = 50,
-        .attitude_sampling_rate = 100
+        .delta_v = 50,
+        .acceleration = 50,
+        .attitude = 100,
+        .rate_of_turn = 100,
+        .magnetic_field = 10,
+        .temperature = 1
     };
 
     mti_init(&mti, &cs_port, 1, &drdy_port, 1, &spi, &config);
