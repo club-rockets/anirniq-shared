@@ -51,7 +51,7 @@ typedef struct {
 /******************************************************************************/
 /*                             Function prototype                             */
 /******************************************************************************/
-float mbar_to_altitude(float pressure);
+float pressure_to_altitude(float pressure);
 float compute_air_density(float pressure, float temperature);
 float compute_sound_speed(float temperature);
 
