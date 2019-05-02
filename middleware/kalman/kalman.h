@@ -44,6 +44,6 @@ typedef struct {
 /*                             Function prototype                             */
 /******************************************************************************/
 void kalman_init(kalman_t *kalman);
-void kalman_update(kalman_t *kalman, float altitude, float acceleration);
+void kalman_update(kalman_t *kalman, float altitude, float acceleration, float dt);
 
 #endif //KALMAN_H_

@@ -73,7 +73,7 @@ void kalman_init(kalman_t *kalman) {
 
 /**
  */
-void kalman_update(kalman_t *kalman, float altitude, float acceleration)
+void kalman_update(kalman_t *kalman, float altitude, float acceleration, float dt)
 {
     uint32_t loop_counter = 0;
     uint32_t convergence = 1;
@@ -103,6 +103,10 @@ void kalman_update(kalman_t *kalman, float altitude, float acceleration)
     for (int i = P1_f32.numRows * P1_f32.numCols - 1; i >= 0; i--) {
         P_past[i] = P1[i];
     }
+
+    A[1] = dt;
+    A[2] = dt * dt * 0.5;
+    A[5] = dt;
 
     Z[0] = altitude;
 
