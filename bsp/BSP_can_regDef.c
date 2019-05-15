@@ -11,13 +11,13 @@
 #include "stdint.h"
 #include "BSP_can_regDef.h"
 
-#define DEF_CAN_REGISTER(name) \
+#define DEF_CAN_REGISTER(reg_name) \
     { \
-        .name = name, \
+        .name = reg_name, \
         .lastTick = 0, \
-        .changeCallback, \
+        .changeCallback = 0, \
         .data = { 0 } \
-    };
+    }
 
 volatile can_reg_t can_emergencyRegisters[] = {
     DEF_CAN_REGISTER("test")
