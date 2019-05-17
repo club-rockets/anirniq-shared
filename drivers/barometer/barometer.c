@@ -1,5 +1,7 @@
 #include "barometer.h"
 
+#include "cmsis_os.h"
+
 static uint16_t barometer_read_prom(barometer_t *barometer, uint8_t coefficient);
 static uint32_t barometer_read_data(barometer_t *barometer, uint8_t cmd);
 
@@ -43,7 +45,7 @@ void barometer_reset(barometer_t *barometer)
     HAL_SPI_Transmit(barometer->spi, tx, 1, 10);
     HAL_GPIO_WritePin(barometer->port, barometer->pin, GPIO_PIN_SET);
 
-    HAL_Delay(3);
+    osDelay(5);
 }
 
 /** Reads the calibration coefficients from the barometer (MS5607) device.
@@ -91,29 +93,29 @@ static uint32_t barometer_read_data(barometer_t *barometer, uint8_t cmd)
     switch (cmd & 0x0F) {
         case CMD_ADC_256:
             //delay = 900us
-            HAL_Delay(1);
+            osDelay(1);
             break;
         case CMD_ADC_512:
             //delay = 3ms;
-            HAL_Delay(3);
+            osDelay(3);
             break;
         case CMD_ADC_1024:
             //delay = 4ms;
-            HAL_Delay(4);
+            osDelay(4);
             break;
         case CMD_ADC_2048:
             //delay = 6ms;
-            HAL_Delay(6);
+            osDelay(6);
             break;
         case CMD_ADC_4096:
             //delay = 10ms;
-            HAL_Delay(10);
+            osDelay(10);
             break;
     }
 
     // Pull CS high to finish the conversion
     HAL_GPIO_WritePin(barometer->port, barometer->pin, GPIO_PIN_SET);
-    HAL_Delay(10);
+    osDelay(10);
     HAL_GPIO_WritePin(barometer->port, barometer->pin, GPIO_PIN_RESET);
 
     // Receive the data after the conversion
@@ -143,7 +145,7 @@ void barometer_update(barometer_t *barometer)
     // dT = D2 - C5 * 2⁸
     // TEMP = 2000 + dT * C6 / 2²³
     delta_temperature = raw_temperature - (barometer->calibration[4] << 8);
-    barometer->temperature = (2000 + delta_temperature * (barometer->calibration[5] >> 23)) / 100.0f;
+    barometer->temperature = (2000 + (delta_temperature * barometer->calibration[5] >> 23)) / 100.0f;
 
     // OFF = = C2 * 2¹⁷ + (C4 * dT ) / 2⁶
     // SENS = C1 * 2 + (C3 * dT ) / 2⁷
