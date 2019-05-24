@@ -115,11 +115,11 @@ void can1Fifo1InitIt(canInstance_t *instance);
 void can1Fifo1DeInitIt(canInstance_t *instance);
 
 //can1 fifo1 register Rx Callback (0 as parameter to unregeistier)
-void can1Fifo1RegisterCallback(void (*callback)(void));i
-i
+void can1Fifo1RegisterCallback(void (*callback)(void));
+
 //get message from sf fifo return positive when new message aviailable
-uint32_t can1SfFifo1Get(canRXpacket_t *packet);i
-i
+uint32_t can1SfFifo1Get(canRXpacket_t *packet);
+
 //enable the interrupt on wakeup and automatic wakeupi
 void can1WakeItInit(void);
 
