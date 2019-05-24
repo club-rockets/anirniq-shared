@@ -1,5 +1,5 @@
 /*
- * BSP_can_regDef.h
+ * bsp_can_regdef.h
  *
  * Created on: 17 mars 2019
  * Author: Marc-Andre Denis
@@ -11,7 +11,7 @@
 #ifndef _BSP_CAN_REGDEF
 #define _BSP_CAN_REGDEF
 
-#include "BSP_CAN.h"
+#include "bsp_can.h"
 #include "stdint.h"
 
 #define BOARD_EMERGENCY_ID_SHIFTED     (0 << BOARD_ID_SHIFT)

@@ -9,7 +9,7 @@
  */
 
 #include "stdint.h"
-#include "BSP_can_regDef.h"
+#include "bsp_can_regdef.h"
 
 #define DEF_CAN_REGISTER(reg_name) \
     { \

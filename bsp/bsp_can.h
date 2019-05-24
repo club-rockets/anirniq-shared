@@ -5,11 +5,11 @@
  *      Author: Marc-Andre
  */
 
-#ifndef BSP_BSP_CAN_H_
-#define BSP_BSP_CAN_H_
+#ifndef BSP_CAN_H
+#define BSP_CAN_H
 
 #include "stdint.h"
-#include "can_driver.h"
+#include "can/can_driver.h"
 
 //Boards ID defined here
 
