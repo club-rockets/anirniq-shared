@@ -16,12 +16,6 @@
 
 #include "id.h"
 
-#define BOARD_EMERGENCY_ID_SHIFTED     (0 << BOARD_ID_SHIFT)
-#define BOARD_MISSION_ID_SHIFTED       (1 << BOARD_ID_SHIFT)
-#define BOARD_COMMUNICATION_ID_SHIFTED (2 << BOARD_ID_SHIFT)
-#define BOARD_ACQUISITION_ID_SHIFTED   (3 << BOARD_ID_SHIFT)
-#define BOARD_MOTHERBOARD_ID_SHIFTED   (4 << BOARD_ID_SHIFT)
-
 extern volatile can_reg_t can_emergencyRegisters[];
 extern volatile can_reg_t can_missionRegisters[];
 extern volatile can_reg_t can_communicationRegisters[];
