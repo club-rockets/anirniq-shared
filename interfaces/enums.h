@@ -23,8 +23,15 @@ typedef enum rocket_state {
 	MAIN_DESCENT,
 	LANDING,
 	RECOVERY,
-	PICKEDUP} rocket_state;
+	PICKEDUP
+} rocket_state;
 
+typedef enum charge_state {
+	NO_CHARGE,
+	DROGUE_SENSE,
+	MAIN_SENSE,
+	BOTH_SENSE
+} charge_state;
 
 enum can_board{
 	EMERGENCY = 0,
