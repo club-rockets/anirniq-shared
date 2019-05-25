@@ -26,4 +26,12 @@ typedef enum rocket_state {
 	PICKEDUP} rocket_state;
 
 
+enum can_board{
+	EMERGENCY = 0,
+	MISSION,
+	COMMUNICATION,
+	ACQUISITION,
+	MOTHERBOARD
+};
+
 #endif /* INTERFACES_ENUMS_H_ */

@@ -10,6 +10,8 @@
 
 #include "stdint.h"
 #include "can/can_driver.h"
+#include "enums.h"
+#include "id.h"
 
 //Boards ID defined here
 
@@ -30,13 +32,6 @@
 
 #define CAN_REG_DATA_SIZE 8
 
-enum can_board{
-	EMERGENCY = 0,
-	MISSION,
-	COMMUNICATION,
-	ACQUISITION,
-	MOTHERBOARD
-};
 
 typedef union{
 	uint32_t UINT32_T;
