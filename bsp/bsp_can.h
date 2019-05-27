@@ -12,6 +12,7 @@
 #include "can/can_driver.h"
 #include "enums.h"
 #include "id.h"
+#include "main.h"
 
 //Boards ID defined here
 
@@ -27,7 +28,9 @@
 #define BOARD_ACQUISITION_ID	3
 #define BOARD_MOTHERBOARD_ID 	4
 
+#ifndef CAN_BOARD
 #define CAN_BOARD MOTHERBOARD
+#endif
 #define CAN_BOARD_ID BOARD_MOTHERBOARD_ID
 
 #define CAN_REG_DATA_SIZE 8
