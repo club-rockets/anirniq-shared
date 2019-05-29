@@ -9,7 +9,7 @@
 #define BSP_CAN_H
 
 #include "stdint.h"
-#include "can/can_driver.h"
+#include "can_driver.h"
 #include "enums.h"
 #include "id.h"
 #include "main.h"
