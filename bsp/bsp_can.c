@@ -85,7 +85,7 @@ uint32_t can_canSetAnyRegisterData(uint32_t board, uint32_t index, can_regData_u
     can_registers[board][index].lastTick = HAL_GetTick();
     can1Fifo0InitIt(&can1Instance);
     //send register
-    while(!canSendPacket(&can1Instance, (CAN_BOARD_ID << 1) | (index << (1 + BOARD_ID_SIZE)), 0, CAN_REG_DATA_SIZE,data));
+    while(!canSendPacket(&can1Instance, (board << 1) | (index << (1 + BOARD_ID_SIZE)), 0, CAN_REG_DATA_SIZE,data));
 
     //call callback
     if (can_registers[board][index].changeCallback) {
