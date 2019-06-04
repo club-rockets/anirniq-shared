@@ -57,6 +57,8 @@ uint32_t can_canInit();
 
 uint32_t can_canSetRegisterData(uint32_t index,can_regData_u* data);
 
+uint32_t can_canSetAnyRegisterData(uint32_t board, uint32_t index, can_regData_u *data);
+
 uint32_t can_getRegisterData(enum can_board board, uint32_t index, can_regData_u* reg);
 
 uint32_t can_getRegisterTimestamp(enum can_board board, uint32_t index);

@@ -41,4 +41,9 @@ enum can_board{
 	MOTHERBOARD
 };
 
+enum comState{
+	PAD_TRANSMISSION,
+	LAUNCH_TRANSMISSION
+};
+
 #endif /* INTERFACES_ENUMS_H_ */

@@ -69,21 +69,27 @@ uint32_t __attribute__((weak)) can_canInit()
 }
 
 //block if no mailbox is available
-uint32_t can_canSetRegisterData(uint32_t index, can_regData_u *data)
+uint32_t can_canSetRegisterData(uint32_t index, can_regData_u *data){
+	return can_canSetAnyRegisterData(CAN_BOARD,index,data);
+}
+
+//block if no mailbox is available
+uint32_t can_canSetAnyRegisterData(uint32_t board, uint32_t index, can_regData_u *data)
 {
-    if (CAN_BOARD >= 5 || index >= can_registersSize[CAN_BOARD]) {
+    if (board >= 5 || index >= can_registersSize[board]) {
         return 0;
     }
     can1Fifo0DeInitIt(&can1Instance);
-    can_registers[CAN_BOARD][index].data = *data;
-    can_registers[CAN_BOARD][index].lastTick = HAL_GetTick();
+    memcpy(&(can_registers[board][index].data),data,sizeof(can_regData_u));
+    //can_registers[board][index].data = *data;
+    can_registers[board][index].lastTick = HAL_GetTick();
     can1Fifo0InitIt(&can1Instance);
     //send register
     while(!canSendPacket(&can1Instance, (CAN_BOARD_ID << 1) | (index << (1 + BOARD_ID_SIZE)), 0, CAN_REG_DATA_SIZE,data));
 
     //call callback
-    if (can_registers[CAN_BOARD][index].changeCallback) {
-        can_registers[CAN_BOARD][index].changeCallback(CAN_BOARD, index);
+    if (can_registers[board][index].changeCallback) {
+        can_registers[board][index].changeCallback(board, index);
     }
 
     return 1;
