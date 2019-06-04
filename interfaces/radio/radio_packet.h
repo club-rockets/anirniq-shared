@@ -14,7 +14,7 @@ typedef union {
     uint8_t BYTES[8];
 } radio_packet_payload_t;
 
-typedef struct {
+typedef struct __attribute__((__packed__)){
     uint8_t node;
     uint8_t message_id;
     radio_packet_payload_t payload;
