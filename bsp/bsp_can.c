@@ -68,27 +68,38 @@ uint32_t __attribute__((weak)) can_canInit()
     return 0;
 }
 
-//block if no mailbox is available
-uint32_t can_canSetRegisterData(uint32_t index, can_regData_u *data){
-	return can_canSetAnyRegisterData(CAN_BOARD,index,data);
+void vMemcpy(volatile void* dest, const volatile void* src,uint32_t lengt){
+	uint32_t i = 0;
+	for(;i<lengt;i++){
+		((uint8_t*)dest)[i] = ((uint8_t*)src)[i];
+	}
 }
 
-//block if no mailbox is available
-uint32_t can_canSetAnyRegisterData(uint32_t board, uint32_t index, can_regData_u *data)
+//return false if no mailbox is available
+uint32_t can_canSetRegisterData(uint32_t index, can_regData_u *data){
+	return can_canSetAnyRegisterData(CAN_BOARD,index,data,1);
+}
+
+//return false if no mailbox is available
+//if data pointer is null, send register without changing data value
+uint32_t can_canSetAnyRegisterData(uint32_t board, uint32_t index, can_regData_u *data,uint8_t callbackEn)
 {
     if (board >= 5 || index >= can_registersSize[board]) {
         return 0;
     }
     can1Fifo0DeInitIt(&can1Instance);
-    memcpy(&(can_registers[board][index].data),data,sizeof(can_regData_u));
-    //can_registers[board][index].data = *data;
+    if(data){
+    	vMemcpy(&(can_registers[board][index].data),data,sizeof(can_regData_u));
+    }
     can_registers[board][index].lastTick = HAL_GetTick();
     can1Fifo0InitIt(&can1Instance);
     //send register
-    while(!canSendPacket(&can1Instance, (board << 1) | (index << (1 + BOARD_ID_SIZE)), 0, CAN_REG_DATA_SIZE,data));
+    if(!canSendPacket(&can1Instance, (board << 1) | (index << (1 + BOARD_ID_SIZE)), 0, CAN_REG_DATA_SIZE,(void*)&(can_registers[board][index].data))){
+    	return 0;
+    }
 
     //call callback
-    if (can_registers[board][index].changeCallback) {
+    if (can_registers[board][index].changeCallback && callbackEn) {
         can_registers[board][index].changeCallback(board, index);
     }
 

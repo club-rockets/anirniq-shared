@@ -16,6 +16,8 @@
 
 #include "id.h"
 
+#define CAN_NUMBER_OF_NODES 5
+
 extern volatile can_reg_t can_emergencyRegisters[];
 extern volatile can_reg_t can_missionRegisters[];
 extern volatile can_reg_t can_communicationRegisters[];
