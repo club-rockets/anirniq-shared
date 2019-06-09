@@ -46,4 +46,9 @@ enum comState{
 	LAUNCH_TRANSMISSION
 };
 
+enum ejectionCommand{
+	NO_EJECTION = 0,
+	EJECTION
+};
+
 #endif /* INTERFACES_ENUMS_H_ */
