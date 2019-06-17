@@ -104,10 +104,6 @@ void kalman_update(kalman_t *kalman, float altitude, float acceleration, float d
         P_past[i] = P1[i];
     }
 
-    A[1] = dt;
-    A[2] = dt * dt * 0.5;
-    A[5] = dt;
-
     Z[0] = altitude;
 
     do {
