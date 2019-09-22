@@ -1,162 +1,150 @@
+
 #include "app_sd.h"
+#include "fatfs.h"
+#include "FreeRTOS.h"
+#include "cmsis_os.h"
 
 #include <stdio.h>
 #include <string.h>
 
-#include "cmsis_os.h"
-#include "fatfs.h"
-#include "ff.h"
-#include "main.h"
+extern uint8_t retSD;    /* Return value for SD */
+extern char SDPath[4];   /* SD logical drive path */
+extern FATFS SDFatFS;    /* File system object for SD logical drive */
+extern FIL SDFile;       /* File object for SD */
 
-static FATFS sdfs;
-static FIL logfile;
-static FIL datafile;
+extern osThreadId app_SDHandle;
 
-static QueueHandle_t sd_events;
-
-static char line[128];
-static char buffer[512] = { 0 };
-static int cursor = 0;
-static int mounted = 0;
+QueueHandle_t sd_queue;
+uint8_t qbuff[SD_QUEUE_SIZE * SD_QUEUE_BLOCK_SIZE];
+StaticQueue_t sq_queueBuff;
 
 
-static sd_data_t data[16];
-static int data_front = 0;
-static int data_next = 0;
-static int data_count = 0;
+uint32_t createDir(char* path);
 
-static void app_sd();
-static void sd_mount();
-static void sd_flush();
-static void sd_write_data(sd_data_t* data);
-osThreadDef(sd, app_sd, osPriorityLow, 1, 2048);
+void stk_SD(void const * argument){
 
-void app_sd_init()
-{
-    sd_events = xQueueCreate(10, sizeof(int));
-    osThreadCreate(osThread(sd), NULL);
+	sd_queue = xQueueCreateStatic(SD_QUEUE_SIZE,SD_QUEUE_BLOCK_SIZE,qbuff,&sq_queueBuff);
+
+	//this string contains the path to the currently used file
+	char filePath[16] = {0};
+
+	uint32_t fileCounter = 0;
+	uint32_t sizeCounter = 0;
+	uint32_t syncTimer = 0;
+
+	struct sd_log rxData = {0};
+	BaseType_t queueRet;
+
+	if( f_mount(&SDFatFS,SDPath,1) != FR_OK){
+		//the card is not present, suspend the task
+		vTaskSuspend(0);
+	}
+
+	//create a new directory to avoid overwriting old data
+	uint32_t dirCounter = createDir(filePath);
+
+
+	sprintf(filePath,"%03lu/%03lu.txt",dirCounter,++fileCounter);
+	//open the new file
+	f_open(&SDFile,filePath,FA_CREATE_ALWAYS|FA_WRITE);
+
+	float a;
+	int32_t b;
+
+	while(1){
+
+		queueRet = xQueueReceive(sd_queue,&rxData,5000);
+		//read from q here
+
+		if(queueRet == pdTRUE){
+			//write data
+			switch(rxData.type){
+			case type_INT:
+				sizeCounter += f_printf(&SDFile,"%s\t%lu\t%ld\n",rxData.title,rxData.time,rxData.data.INT);
+				break;
+			case type_UINT:
+				sizeCounter += f_printf(&SDFile,"%s\t%lu\t%lu\n",rxData.title,rxData.time,rxData.data.UINT);
+				break;
+			case type_FLOAT:
+				//the fatfs library does not support floats
+				b = (int32_t)(rxData.data.FLOAT);
+				a = (rxData.data.FLOAT);
+				sizeCounter += f_printf(&SDFile,"%s\t%lu\t,%ld",rxData.title,rxData.time,b);
+				a-=(float)b;
+				if(a<0) a = 1-a;
+				b = (int32_t)(a*1000.0);
+				sizeCounter += f_printf(&SDFile,".%ld\n",b);
+			}
+
+		}
+
+
+
+		//flush every 10sec
+		if(osKernelSysTick() - syncTimer >= 10000){
+
+			syncTimer = osKernelSysTick();
+			f_sync(&SDFile);
+		}
+
+		//if file too large create a new one (10mb)
+		if(sizeCounter > 10000000){
+			sizeCounter = 0;
+			//close the current file
+			f_close(&SDFile);
+			//create a new file name
+			sprintf(filePath,"%03lu/%03lu.txt",dirCounter,++fileCounter);
+			//open the new file
+			f_open(&SDFile,filePath,FA_CREATE_ALWAYS|FA_WRITE);
+		}
+	}
+
 }
 
-sd_data_t* app_sd_prepare_data()
-{
-    if (data_count >= 16 || !mounted) {
-        return NULL;
-    }
 
-    if (data_next == 16) {
-        data_next = 0;
-    }
+uint32_t createDir(char* path){
+	//check for a unused directory name
+	uint32_t dirCounter = 0;
 
-    data_count++;
-    return &data[data_next++];
+		do{
+			dirCounter += 1;
+			//check if 00x directory already exist
+			sprintf(path,"%03lu",dirCounter);
+		}while( f_stat(path,0) == FR_OK && dirCounter <= 999);
+
+	//create a new directory
+	f_mkdir(path);
+
+	return dirCounter;
 }
 
-void app_sd_write_data(sd_data_t* data)
-{
-    int event = DATA_READY;
-    if (!mounted) {
-        return;
-    }
-    xQueueSend(sd_events, &event, osWaitForever);
+//add the value to the sd queue, name : data
+uint32_t sd_writeInt(char* name,int32_t data){
+	struct sd_log dataStr;
+	dataStr.data.INT = data;
+	dataStr.time = osKernelSysTick();
+	dataStr.type = type_INT;
+	dataStr.title = name;
+
+	return xQueueSend(sd_queue,&dataStr,0);
 }
 
-static void app_sd()
-{
-    int event;
+uint32_t sd_writeUint(char* name,uint32_t data){
+	struct sd_log dataStr;
+	dataStr.data.UINT = data;
+	dataStr.time = osKernelSysTick();
+	dataStr.type = type_UINT;
+	dataStr.title = name;
 
-    while (1) {
-        xQueueReceive(sd_events, &event, osWaitForever);
-        switch (event) {
-            case CARD_CONNECTED:
-                sd_mount();
-                mounted = 1;
-                cursor = 0;
-                break;
-
-            case CARD_DISCONNECTED:
-                HAL_GPIO_WritePin(LED3_GPIO_Port, LED3_Pin, GPIO_PIN_RESET);
-                mounted = 0;
-                break;
-
-            case DATA_READY:
-                sd_write_data(&data[data_front++]);
-                if (data_front == 16) {
-                    data_front = 0;
-                }
-                data_count--;
-                break;
-
-            default:
-                break;
-        }
-    }
+	return xQueueSend(sd_queue,&dataStr,0);
 }
 
-static void sd_mount()
-{
-    if (BSP_SD_Init() == MSD_OK) {
-        if (f_mount(&sdfs, SDPath, 1) != FR_OK) {
-            return;
-        }
+uint32_t sd_writeFloat(char* name,float data){
+	struct sd_log dataStr;
+	dataStr.data.FLOAT = data;
+	dataStr.time = osKernelSysTick();
+	dataStr.type = type_FLOAT;
+	dataStr.title = name;
 
-        if (f_open(&logfile, "journal.log", FA_OPEN_ALWAYS | FA_WRITE) != FR_OK) {
-            return;
-        }
-        f_lseek(&logfile, f_size(&logfile));
-
-        if (f_open(&datafile, "data.csv", FA_OPEN_ALWAYS | FA_WRITE) != FR_OK) {
-            return;
-        }
-        f_lseek(&datafile, f_size(&datafile));
-
-        f_printf(&logfile, "%u SD Card mounted\n", HAL_GetTick());
-        f_sync(&logfile);
-    }
-}
-
-static void sd_write_data(sd_data_t* data)
-{
-    int size, left;
-    if (!mounted) {
-        return;
-    }
-
-    app_sd_format_data(data, line, 128);
-    size = strlen(line);
-    left = 512 - cursor;
-
-    if (size > left) {
-        memcpy(buffer + cursor, line, left);
-        sd_flush();
-        cursor = size - left;
-        memcpy(buffer, line + left, cursor);
-    }
-    else {
-        memcpy(buffer + cursor, line, size);
-        cursor += size;
-    }
-
-    return;
-}
-
-static void sd_flush()
-{
-    unsigned bw;
-    f_write(&datafile, buffer, 512, &bw);
-    f_sync(&datafile);
-    cursor = 0;
-    HAL_GPIO_TogglePin(LED3_GPIO_Port, LED3_Pin);
-}
-
-void app_sd_detect_handler()
-{
-    long int pd;
-    int event;
-
-    if (!HAL_GPIO_ReadPin(SD_DETECT_GPIO_Port, SD_DETECT_Pin)) {
-        event = CARD_CONNECTED;
-    } else {
-        event = CARD_DISCONNECTED;
-    }
-    xQueueSendFromISR(sd_events, &event, &pd);
+	return xQueueSend(sd_queue,&dataStr,0);
 }
