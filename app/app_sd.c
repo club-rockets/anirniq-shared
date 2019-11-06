@@ -69,7 +69,7 @@ void stk_SD(void const * argument){
 				//the fatfs library does not support floats
 				b = (int32_t)(rxData.data.FLOAT);
 				a = (rxData.data.FLOAT);
-				sizeCounter += f_printf(&SDFile,"%s\t%lu\t,%ld",rxData.title,rxData.time,b);
+				sizeCounter += f_printf(&SDFile,"%s\t%lu\t%ld",rxData.title,rxData.time,b);
 				a-=(float)b;
 				if(a<0) a = 1-a;
 				b = (int32_t)(a*1000.0);
