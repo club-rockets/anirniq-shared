@@ -35,9 +35,14 @@ void tsk_SD(void const * argument){
 	struct sd_log rxData = {0};
 	BaseType_t queueRet;
 
-	if( f_mount(&SDFatFS,SDPath,1) != FR_OK){
+	osDelay(100);
+
+	FRESULT fatStatus = f_mount(&SDFatFS,SDPath,1);
+
+	while( fatStatus != FR_OK){
 		//the card is not present, suspend the task
-		vTaskSuspend(0);
+		osDelay(100);
+		//vTaskSuspend(0);
 	}
 
 	//create a new directory to avoid overwriting old data
