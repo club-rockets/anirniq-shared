@@ -21,7 +21,7 @@ StaticQueue_t sq_queueBuff;
 
 uint32_t createDir(char* path);
 
-void stk_SD(void const * argument){
+void tsk_SD(void const * argument){
 
 	sd_queue = xQueueCreateStatic(SD_QUEUE_SIZE,SD_QUEUE_BLOCK_SIZE,qbuff,&sq_queueBuff);
 
