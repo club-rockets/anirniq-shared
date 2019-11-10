@@ -66,12 +66,38 @@ volatile can_reg_t can_motherboardRegisters[] = {
     DEF_CAN_REGISTER("vbatt_amperage")
 };
 
+volatile can_reg_t can_benchTestRegisters[] = {
+		DEF_CAN_REGISTER("status"),
+		DEF_CAN_REGISTER("pressure_1"),
+		DEF_CAN_REGISTER("pressure_2"),
+		DEF_CAN_REGISTER("pressure_3"),
+		DEF_CAN_REGISTER("pressure_4"),
+		DEF_CAN_REGISTER("temp_1"),
+		DEF_CAN_REGISTER("temp_2"),
+		DEF_CAN_REGISTER("temp_3"),
+		DEF_CAN_REGISTER("temp_4"),
+		DEF_CAN_REGISTER("temp_5"),
+		DEF_CAN_REGISTER("temp_6"),
+		DEF_CAN_REGISTER("load1"),
+		DEF_CAN_REGISTER("load2"),
+		DEF_CAN_REGISTER("load3"),
+		DEF_CAN_REGISTER("valve1_state"),
+		DEF_CAN_REGISTER("valve2_state")
+};
+
+volatile can_reg_t can_benchTestStationRegisters[] = {
+		DEF_CAN_REGISTER("status"),
+		DEF_CAN_REGISTER("command")
+};
+
 volatile can_reg_t* can_registers[] = {
     can_emergencyRegisters,
     can_missionRegisters,
     can_communicationRegisters,
     can_acquisitionRegisters,
     can_motherboardRegisters,
+	can_benchTestRegisters,
+	can_benchTestStationRegisters
 };
 
 const uint8_t can_registersSize[] = {
@@ -79,5 +105,7 @@ const uint8_t can_registersSize[] = {
     sizeof(can_missionRegisters)/sizeof(can_reg_t),
     sizeof(can_communicationRegisters)/sizeof(can_reg_t),
     sizeof(can_acquisitionRegisters)/sizeof(can_reg_t),
-    sizeof(can_motherboardRegisters)/sizeof(can_reg_t)
+    sizeof(can_motherboardRegisters)/sizeof(can_reg_t),
+	sizeof(can_benchTestRegisters)/sizeof(can_reg_t),
+	sizeof(can_benchTestStationRegisters)/sizeof(can_reg_t)
 };

@@ -23,6 +23,8 @@ extern volatile can_reg_t can_missionRegisters[];
 extern volatile can_reg_t can_communicationRegisters[];
 extern volatile can_reg_t can_acquisitionRegisters[];
 extern volatile can_reg_t can_motherboardRegisters[];
+extern volatile can_reg_t can_benchTestRegisters[];
+extern volatile can_reg_t can_benchTestStationRegisters[];
 
 extern volatile can_reg_t* can_registers[];
 
