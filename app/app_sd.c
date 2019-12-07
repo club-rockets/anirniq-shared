@@ -7,10 +7,24 @@
 #include <stdio.h>
 #include <string.h>
 
+#ifdef SD_USER_IO
+
+extern uint8_t retUSER; /* Return value for USER */
+extern char USERPath[4]; /* USER logical drive path */
+extern FATFS USERFatFS; /* File system object for USER logical drive */
+extern FIL USERFile; /* File object for USER */
+
+#define retSD retUSER
+#define SDPath USERPath
+#define SDFatFS USERFatFS
+#define SDFile USERFile
+
+#else
 extern uint8_t retSD;    /* Return value for SD */
 extern char SDPath[4];   /* SD logical drive path */
 extern FATFS SDFatFS;    /* File system object for SD logical drive */
 extern FIL SDFile;       /* File object for SD */
+#endif
 
 extern osThreadId app_SDHandle;
 
@@ -22,6 +36,7 @@ StaticQueue_t sq_queueBuff;
 uint32_t createDir(char* path);
 
 void tsk_SD(void const * argument){
+
 
 	sd_queue = xQueueCreateStatic(SD_QUEUE_SIZE,SD_QUEUE_BLOCK_SIZE,qbuff,&sq_queueBuff);
 
@@ -41,8 +56,7 @@ void tsk_SD(void const * argument){
 
 	while( fatStatus != FR_OK){
 		//the card is not present, suspend the task
-		osDelay(100);
-		//vTaskSuspend(0);
+		vTaskSuspend(0);
 	}
 
 	//create a new directory to avoid overwriting old data
@@ -51,7 +65,7 @@ void tsk_SD(void const * argument){
 
 	sprintf(filePath,"%03lu/%03lu.txt",dirCounter,++fileCounter);
 	//open the new file
-	f_open(&SDFile,filePath,FA_CREATE_ALWAYS|FA_WRITE);
+	fatStatus = f_open(&SDFile,filePath,FA_CREATE_ALWAYS|FA_WRITE);
 
 	float a;
 	int32_t b;
@@ -104,21 +118,23 @@ void tsk_SD(void const * argument){
 		}
 	}
 
+
 }
 
 
 uint32_t createDir(char* path){
 	//check for a unused directory name
 	uint32_t dirCounter = 0;
-
+	FRESULT fatStatus = FR_OK;
 		do{
 			dirCounter += 1;
 			//check if 00x directory already exist
 			sprintf(path,"%03lu",dirCounter);
-		}while( f_stat(path,0) == FR_OK && dirCounter <= 999);
+			fatStatus = f_stat(path,0);
+		}while( fatStatus == FR_OK && dirCounter <= 999);
 
 	//create a new directory
-	f_mkdir(path);
+		fatStatus = f_mkdir(path);
 
 	return dirCounter;
 }
