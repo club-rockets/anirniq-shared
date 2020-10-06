@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE protocol [
+<!ELEMENT protocol (node|enum)+>
+<!ATTLIST protocol name CDATA #REQUIRED>
+<!ATTLIST protocol c_prefix CDATA #IMPLIED>
+
+<!ELEMENT enum (value+)*>
+<!ATTLIST enum name CDATA #REQUIRED>
+
+<!ELEMENT value EMPTY>
+<!ATTLIST value key CDATA #REQUIRED>
+<!ATTLIST value value CDATA #REQUIRED>
+
+<!ELEMENT node (message|message_group)*>
+<!ATTLIST node id CDATA #REQUIRED>
+<!ATTLIST node name CDATA #REQUIRED>
+ 
+<!ELEMENT message_group (message|message_group)*>
+<!ATTLIST message_group name CDATA #REQUIRED>
+ 
+<!ELEMENT message EMPTY>
+<!ATTLIST message id CDATA #REQUIRED>
+<!ATTLIST message name CDATA #REQUIRED>
+<!ATTLIST message type CDATA #REQUIRED>
+]>
+<protocol name="anirniq" c_prefix="CAN">
+    <node id="0" name="emergency">
+        <message_group name="engine">
+            <message id="0" name="stop" type="int" />
+        </message_group>
+    </node>
+
+    <node id="1" name="mission">
+        <message id="0" name="status" type="int" />
+        <message id="1" name="rocket_status" type="int" />
+        <message id="2" name="charge_status" type="int" />
+    </node>
+
+    <node id="2" name="remote_control">
+        <message id="0" name="status" type="int" />
+        <message id="1" name="sleep" type="int" />
+
+        <message_group name="eject">
+            <message id="2" name="drogue" type="int" />
+            <message id="3" name="main" type="int" />
+        </message_group>
+
+        <message_group name="engine">
+            <message_group name="sequence">
+                <message id="4" name="set" type="int" />
+                <message id="5" name="start" type="int" />
+                <message id="6" name="stop" type="int" />
+            </message_group>
+        </message_group>
+    </node>
+
+    <node id="3" name="acquisition">
+        <message id="0" name="status" type="int" />
+        <message id="3" name="altitude" type="float" />
+        <message id="4" name="vertical_velocity" type="float" />
+        <message id="14" name="imu_temperature" type="float" />
+
+        <message_group name="air">
+            <message id="1" name="pressure" type="float" />
+            <message id="2" name="temperature" type="float" />
+        </message_group>
+
+        <message_group name="acceleration">
+            <message id="5" name="x" type="float" />
+            <message id="6" name="y" type="float" />
+            <message id="7" name="z" type="float" />
+        </message_group>
+
+        <message_group name="attitude">
+            <message id="8" name="x" type="float" />
+            <message id="9" name="y" type="float" />
+            <message id="10" name="z" type="float" />
+        </message_group>
+
+        <message_group name="magnetic_field">
+            <message id="11" name="x" type="float" />
+            <message id="12" name="y" type="float" />
+            <message id="13" name="z" type="float" />
+        </message_group>
+
+        <message_group name="gps">
+            <message id="15" name="lat" type="float" />
+            <message id="16" name="lon" type="float" />
+        </message_group>
+    </node>
+
+    <node id="4" name="motherboard">
+        <message id="0" name="status" type="int" />
+        <message id="1" name="3v3_voltage" type="float" />
+        <message id="2" name="3v3_amperage" type="float" />
+        <message id="3" name="5v_voltage" type="float" />
+        <message id="4" name="5v_amperage" type="float" />
+        <message id="5" name="vbatt_voltage" type="float" />
+        <message id="6" name="vbatt_amperage" type="float" />
+    </node>
+
+    <node id="5" name="communication">
+        <message id="0" name="status" type="int" />
+    </node>
+
+    <node id="6" name="testbench">
+        <message id="0" name="status" type="int" />
+        <message id="1" name="pressure_1" type="float" />
+        <message id="2" name="pressure_2" type="float" />
+        <message id="3" name="pressure_3" type="float" />
+        <message id="4" name="pressure_4" type="float" />
+        <message id="5" name="temp_1" type="float" />
+        <message id="6" name="temp_2" type="float" />
+        <message id="7" name="temp_3" type="float" />
+        <message id="8" name="temp_4" type="float" />
+        <message id="9" name="temp_5" type="float" />
+        <message id="10" name="temp_6" type="float" />
+        <message id="11" name="load1" type="float" />
+        <message id="12" name="load2" type="float" />
+        <message id="13" name="load3" type="float" />
+        <message id="14" name="valve1_state" type="int" />
+        <message id="15" name="valve2_state" type="int" />
+    </node>
+</protocol>
