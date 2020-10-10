@@ -26,6 +26,16 @@ typedef enum rocket_state {
 	PICKEDUP
 } rocket_state;
 
+typedef enum rocket_engine_state {
+	IDLE,
+	INITIALISATION,
+	READY,
+	STANDBY,
+	BURN,
+	STOP,
+	EMERGENCY
+} rocket_engine_state;
+
 typedef enum charge_state {
 	NO_CHARGE,
 	DROGUE_SENSE,
