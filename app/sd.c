@@ -1,8 +1,8 @@
 
-#include "app_sd.h"
+#include "sd.h"
+
 #include "fatfs.h"
-#include "FreeRTOS.h"
-#include "cmsis_os.h"
+#include "main.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -24,19 +24,16 @@ extern uint8_t retSD;    /* Return value for SD */
 extern char SDPath[4];   /* SD logical drive path */
 extern FATFS SDFatFS;    /* File system object for SD logical drive */
 extern FIL SDFile;       /* File object for SD */
+static BYTE work[_MAX_SS]; /* Work area (larger is better for processing time) */
 #endif
-
-extern osThreadId app_SDHandle;
 
 QueueHandle_t sd_queue;
 uint8_t qbuff[SD_QUEUE_SIZE * SD_QUEUE_BLOCK_SIZE];
 StaticQueue_t sq_queueBuff;
 
-
 uint32_t createDir(char* path);
 
-void tsk_SD(void const * argument){
-
+void task_sd(void * pvParameters){
 
 	sd_queue = xQueueCreateStatic(SD_QUEUE_SIZE,SD_QUEUE_BLOCK_SIZE,qbuff,&sq_queueBuff);
 
@@ -50,13 +47,14 @@ void tsk_SD(void const * argument){
 	struct sd_log rxData = {0};
 	BaseType_t queueRet;
 
-	osDelay(100);
+	vTaskDelay(100);
 
 	FRESULT fatStatus = f_mount(&SDFatFS,SDPath,1);
 
-	while( fatStatus != FR_OK){
-		//the card is not present, suspend the task
+	if( fatStatus != FR_OK){
+
 		vTaskSuspend(0);
+
 	}
 
 	//create a new directory to avoid overwriting old data
@@ -94,15 +92,12 @@ void tsk_SD(void const * argument){
 				b = (int32_t)(a*1000.0);
 				sizeCounter += f_printf(&SDFile,".%ld\n",b);
 			}
-
 		}
 
-
-
 		//flush every 10sec
-		if(osKernelSysTick() - syncTimer >= 10000){
+		if(xTaskGetTickCount() - syncTimer >= 10000){
 
-			syncTimer = osKernelSysTick();
+			syncTimer = xTaskGetTickCount();
 			f_sync(&SDFile);
 		}
 
@@ -117,10 +112,7 @@ void tsk_SD(void const * argument){
 			f_open(&SDFile,filePath,FA_CREATE_ALWAYS|FA_WRITE);
 		}
 	}
-
-
 }
-
 
 uint32_t createDir(char* path){
 	//check for a unused directory name
@@ -143,7 +135,7 @@ uint32_t createDir(char* path){
 uint32_t sd_writeInt(char* name,int32_t data){
 	struct sd_log dataStr;
 	dataStr.data.INT = data;
-	dataStr.time = osKernelSysTick();
+	dataStr.time = xTaskGetTickCount();
 	dataStr.type = type_INT;
 	dataStr.title = name;
 
@@ -153,7 +145,7 @@ uint32_t sd_writeInt(char* name,int32_t data){
 uint32_t sd_writeUint(char* name,uint32_t data){
 	struct sd_log dataStr;
 	dataStr.data.UINT = data;
-	dataStr.time = osKernelSysTick();
+	dataStr.time = xTaskGetTickCount();
 	dataStr.type = type_UINT;
 	dataStr.title = name;
 
@@ -163,7 +155,7 @@ uint32_t sd_writeUint(char* name,uint32_t data){
 uint32_t sd_writeFloat(char* name,float data){
 	struct sd_log dataStr;
 	dataStr.data.FLOAT = data;
-	dataStr.time = osKernelSysTick();
+	dataStr.time = xTaskGetTickCount();
 	dataStr.type = type_FLOAT;
 	dataStr.title = name;
 

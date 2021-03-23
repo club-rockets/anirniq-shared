@@ -27,7 +27,7 @@ struct sd_log{
 	union sd_data data;
 };
 
-void tsk_SD(void const * argument);
+void task_sd(void * pvParameters);
 
 //add the value to the sd queue, name : data
 uint32_t sd_writeInt(char* name,int32_t data);
