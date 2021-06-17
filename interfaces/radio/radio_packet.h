@@ -3,6 +3,14 @@
 
 #include <stdint.h>
 
+#ifdef __GNUC__
+#define PACK(__Declaration__) __Declaration__ __attribute__((__packed__))
+#endif
+
+#ifdef _MSC_VER
+#define PACK(__Declaration__) __pragma(pack(push, 1)) __Declaration__ __pragma(pack(pop))
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -14,12 +22,13 @@ typedef union {
     uint8_t BYTES[8];
 } radio_packet_payload_t;
 
-typedef struct __attribute__((__packed__)){
+PACK(struct radio_packet {
     uint8_t node;
     uint8_t message_id;
     radio_packet_payload_t payload;
     uint8_t checksum;
-} radio_packet_t;
+});
+typedef struct radio_packet radio_packet_t;
 
 uint8_t radio_compute_crc(radio_packet_t* packet);
 
